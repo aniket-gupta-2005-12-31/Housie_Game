@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Housie/Tambola Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f4fc;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #3a0ca3;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        h1 span {
+            color: #5f0aff;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px auto;
+            flex-wrap: wrap;
+        }
+
+        .current-number {
+            background: white;
+            padding: 30px 50px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-size: 20px;
+        }
+
+        .current-number h2 {
+            font-size: 50px;
+            color: #3a0ca3;
+        }
+
+        .buttons button {
+            margin: 10px;
+            padding: 15px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .buttons button:nth-child(1) {
+            background: #3a0ca3;
+        }
+
+        .buttons button.reset {
+            background: #f72585;
+        }
+
+        .middle {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .number-board,
+        .your-ticket {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .board,
+        .ticket {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .board div,
+        .ticket div {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: #fff;
+            font-weight: 600;
+        }
+
+        .board div.called {
+            background-color: #f72585;
+            color: #fff;
+        }
+
+        .bottom {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .recent-number {
+            background: white;
+            padding: 20px 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            font-size: 18px;
+        }
+
+        .winning-conditions {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            text-align: left;
+        }
+
+        .winning-conditions label {
+            display: block;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Housie/<span>Tambola Game</span></h1>
+        <p>Enjoy the classic number calling game!</p>
+
+        <div class="top">
+            <div class="current-number">
+                <p>Current Number</p>
+                <h2 id="currentNumber">--</h2>
+            </div>
+            <div class="buttons">
+                <button onclick="callNumber()">🎲 Call Number</button>
+                <button class="reset" onclick="resetGame()">🔁 Reset Game</button>
+            </div>
+        </div>
+
+        <div class="middle">
+            <div class="number-board">
+                <h3>🔢 Number Board</h3>
+                <div class="board" id="numberBoard"></div>
+            </div>
+
+            <div class="your-ticket">
+                <h3>🧾 Your Ticket</h3>
+                <div class="ticket" id="yourTicket"></div>
+            </div>
+        </div>
+
+        <div class="bottom">
+            <div class="recent-number">
+                <p>Recent: <span id="recentNumber">--</span></p>
+            </div>
+            <div class="winning-conditions">
+                <h3>🏆 Winning Conditions</h3>
+                <label><input type="checkbox" /> Early Five</label>
+                <label><input type="checkbox" /> Top Line</label>
+                <label><input type="checkbox" /> Middle Line</label>
+                <label><input type="checkbox" /> Bottom Line</label>
+                <label><input type="checkbox" /> Full House</label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let numbers = Array.from({ length: 90 }, (_, i) => i + 1);
+        let calledNumbers = [];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function callNumber() {
+            if (numbers.length === 0) return alert("All numbers have been called!");
+
+            shuffle(numbers);
+            const number = numbers.pop();
+            calledNumbers.push(number);
+
+            document.getElementById("currentNumber").innerText = number;
+            document.getElementById("recentNumber").innerText = number;
+
+            const cell = document.getElementById(`cell-${number}`);
+            if (cell) cell.classList.add("called");
+        }
+
+        function resetGame() {
+            numbers = Array.from({ length: 90 }, (_, i) => i + 1);
+            calledNumbers = [];
+            document.getElementById("currentNumber").innerText = "--";
+            document.getElementById("recentNumber").innerText = "--";
+
+            const allCells = document.querySelectorAll(".board div");
+            allCells.forEach(cell => cell.classList.remove("called"));
+        }
+
+        function createBoard() {
+            const board = document.getElementById("numberBoard");
+            board.innerHTML = '';
+            for (let i = 1; i <= 90; i++) {
+                const div = document.createElement("div");
+                div.id = `cell-${i}`;
+                div.textContent = i;
+                board.appendChild(div);
+            }
+        }
+
+        function createTicket() {
+            const ticket = document.getElementById("yourTicket");
+            const ticketNumbers = [11, 22, 32, 50, 61, 14, 36, 42, 56, 72, 40, 45, 59, 64, 87]; // Fixed numbers from your image
+            ticket.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 5; j++) {
+                    const num = ticketNumbers[i * 5 + j];
+                    const div = document.createElement("div");
+                    div.textContent = num;
+                    ticket.appendChild(div);
+                }
+            }
+        }
+
+        createBoard();
+        createTicket();
+
+    </script>
+</body>
+
+</html>
